@@ -1,7 +1,7 @@
 # Личный проект «Шесть городов»
 
-* Студент: [Ксения Плюснина](https://up.htmlacademy.ru/univer-nodejs-api/5/user/2673203).
-* Наставник: `Неизвестно`.
+- Студент: [Ксения Плюснина](https://up.htmlacademy.ru/univer-nodejs-api/5/user/2673203).
+- Наставник: [Олег Глущенко](https://htmlacademy.ru/profile/id305355).
 
 ---
 
