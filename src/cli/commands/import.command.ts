@@ -1,9 +1,9 @@
-import { Command } from "./command.interface.js";
-import { TSVFileReader } from "../../shared/libs/file-reader/index.js";
+import { Command } from './command.interface.js';
+import { TSVFileReader } from '../../shared/libs/file-reader/index.js';
 
 export class ImportCommand implements Command {
   public getName(): string {
-    return "--import";
+    return '--import';
   }
 
   public execute(...parameters: string[]): void {

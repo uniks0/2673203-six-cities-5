@@ -1,12 +1,12 @@
-import { CommandParser } from "./command-parser.js";
-import { Command } from "./commands/command.interface.js";
+import { CommandParser } from './command-parser.js';
+import { Command } from './commands/command.interface.js';
 
 type CommandCollection = Record<string, Command>;
 
 export class CLIApplication {
   private commands: CommandCollection = {};
 
-  constructor(private readonly defaultCommand: string = "--help") {}
+  constructor(private readonly defaultCommand: string = '--help') {}
 
   public registerCommands(commandList: Command[]): void {
     commandList.forEach((command) => {
