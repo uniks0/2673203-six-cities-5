@@ -24,7 +24,7 @@ export type Coordinates = {
   longitude: number;
 };
 
-export interface RentalOffer {
+export interface Offer {
   title: string;
   description: string;
   publicationDate: Date;
