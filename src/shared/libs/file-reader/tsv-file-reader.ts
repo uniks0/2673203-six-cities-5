@@ -1,91 +1,50 @@
-import { Offer } from '../../../types/offer.js';
-import { UserType } from '../../../types/user.js';
+import { createReadStream } from 'node:fs';
+import { EventEmitter } from 'node:events';
 import { FileReader } from './file-reader.interface.js';
-import { readFileSync } from 'node:fs';
 
-export class TSVFileReader implements FileReader {
-  private rawData = '';
-
-  constructor(private readonly filename: string) {}
-
-  public read(): void {
-    this.rawData = readFileSync(this.filename, { encoding: 'utf-8' });
+export class TSVFileReader extends EventEmitter implements FileReader {
+  constructor(private readonly filename: string) {
+    super();
   }
 
-  public toArray(): Offer[] {
-    if (!this.rawData) {
-      throw new Error('File was not read');
-    }
+  public async read(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const readStream = createReadStream(this.filename, {
+        encoding: 'utf8',
+        highWaterMark: 16384,
 
-    return this.rawData
-      .split('\n')
-      .filter((row) => row.trim().length > 0)
-      .map((line) => line.split('\t'))
-      .map(
-        ([
-          title,
-          description,
-          publicationDate,
-          city,
-          previewImage,
-          images,
-          isPremium,
-          isFavorite,
-          rating,
-          type,
-          bedrooms,
-          maxAdults,
-          price,
-          amenities,
-          name,
-          avatar,
-          password,
-          email,
-          commentsCount,
-          latitude,
-          longitude,
-        ]) => ({
-          title,
-          description,
-          publicationDate: new Date(publicationDate),
-          city: city as
-            | 'Paris'
-            | 'Cologne'
-            | 'Brussels'
-            | 'Amsterdam'
-            | 'Hamburg'
-            | 'Dusseldorf',
-          previewImage,
-          images: images.split(';'),
-          isPremium: isPremium.toLowerCase() === 'true',
-          isFavorite: isFavorite.toLowerCase() === 'true',
-          rating: Number.parseFloat(rating),
-          type: type as 'apartment' | 'house' | 'room' | 'hotel',
-          bedrooms: Number.parseInt(bedrooms, 10),
-          maxAdults: Number.parseInt(maxAdults, 10),
-          price: Number.parseInt(price, 10),
-          amenities: amenities.split(';') as Array<
-            | 'Breakfast'
-            | 'Air conditioning'
-            | 'Laptop friendly workspace'
-            | 'Baby seat'
-            | 'Washer'
-            | 'Towels'
-            | 'Fridge'
-          >,
-          author: {
-            name,
-            email,
-            avatar,
-            password,
-            type: UserType.Standard,
-          },
-          commentsCount: commentsCount ? Number.parseInt(commentsCount, 10) : 0,
-          location: {
-            latitude: Number.parseFloat(latitude),
-            longitude: Number.parseFloat(longitude),
-          },
-        })
-      );
+      });
+
+      let remainingData = '';
+      let nextLinePosition = -1;
+      let lineCount = 0;
+
+      readStream.on('data', (chunk: string) => {
+        remainingData += chunk.toString();
+
+        while ((nextLinePosition = remainingData.indexOf('\n')) >= 0) {
+          const completeRow = remainingData.slice(0, nextLinePosition + 1);
+          remainingData = remainingData.slice(++nextLinePosition);
+          lineCount++;
+
+          this.emit('line', completeRow.trim());
+        }
+      });
+
+      readStream.on('end', () => {
+        if (remainingData.trim().length > 0) {
+          lineCount++;
+          this.emit('line', remainingData.trim());
+        }
+
+        this.emit('end', lineCount);
+        resolve();
+      });
+
+      readStream.on('error', (error) => {
+        this.emit('error', error);
+        reject(error);
+      });
+    });
   }
 }

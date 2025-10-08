@@ -23,7 +23,7 @@
     "types": ["node"],
     "lib": ["ESNext"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/shared/libs/offer-generator"],
   "exclude": ["node_modules", "**/*.test.ts"],
   "ts-node": {
     "esm": true
