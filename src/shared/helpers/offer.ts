@@ -1,5 +1,5 @@
-import { Amenity, City, Coordinates, HousingType, Offer } from '../../types/offer';
-import { User, UserType } from '../../types/user';
+import { Amenity, City, Coordinates, HousingType, Offer } from '../../types/offer.js';
+import { User, UserType } from '../../types/user.js';
 
 export function createOffer(offerData: string): Offer {
   const [
