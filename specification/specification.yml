@@ -1,0 +1,594 @@
+openapi: 3.1.0
+info:
+  title: API сервер для проекта «Шесть городов».
+  description: |-
+    * Список ресурсов и маршрутов сервера «Шесть городов».
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 2.0.0
+
+servers:
+  - url: https://api.example.com/api
+    description: Прод
+  - url: https://localhost:4000/api
+    description: Локальный сервер разработки
+
+tags:
+  - name: offers
+    description: Действия с объявлениями.
+  - name: comments
+    description: Действия с комментариями.
+  - name: users
+    description: Действия с пользователем.
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token authentication. Use HTTPS in production.
+
+  schemas:
+    Location:
+      type: object
+      properties:
+        latitude:
+          type: number
+          example: 52.370216
+        longitude:
+          type: number
+          example: 4.895168
+      required: [latitude, longitude]
+
+    City:
+      type: string
+      enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+
+    HousingType:
+      type: string
+      enum: [apartment, house, room, hotel]
+
+    Amenity:
+      type: string
+      enum: [Breakfast, Air conditioning, Laptop friendly workspace, Baby seat, Washer, Towels, Fridge]
+
+    UserType:
+      type: string
+      enum: [обычный, pro] 
+
+    User:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          example: 65f1234a5b7890cdef123456
+        name:
+          type: string
+          minLength: 1
+          maxLength: 15
+          example: Keks
+          pattern: '^[a-zA-Zа-яА-ЯёЁ][a-zA-Zа-яА-ЯёЁ0-9 ]*$'
+        email:
+          type: string
+          format: email
+          example: Keks@example.com
+          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        avatar:
+          type: string
+          format: uri
+          example: https://example.com/avatars/keks.png
+        type:
+          $ref: '#/components/schemas/UserType'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [name, email, type]
+
+    UserRegisterInput:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 15
+          pattern: '^[a-zA-Zа-яА-ЯёЁ][a-zA-Zа-яА-ЯёЁ0-9 ]*$'
+        email:
+          type: string
+          format: email
+          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        avatar:
+          type: string
+          format: uri
+        password:
+          type: string
+          minLength: 6
+          maxLength: 12
+        type:
+          $ref: '#/components/schemas/UserType'
+      required: [name, email, password, type]
+
+    UserLoginInput:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        password:
+          type: string
+          minLength: 6
+          maxLength: 12
+      required: [email, password]
+
+    Offer:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 65f1234a5b7890cdef123456
+        title:
+          type: string
+          minLength: 10
+          maxLength: 100
+          pattern: '^[a-zA-Zа-яА-ЯёЁ0-9\s\.,!?\-()]{10,100}$'
+        description:
+          type: string
+          minLength: 20
+          maxLength: 1024
+          pattern: '^[a-zA-Zа-яА-ЯёЁ0-9\s\.,!?\-()]{10,100}$'
+        publicationDate:
+          type: string
+          format: date-time
+        city:
+          $ref: '#/components/schemas/City'
+        previewImage:
+          type: string
+          format: uri
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+          minItems: 6
+          maxItems: 6
+        isPremium:
+          type: boolean
+        isFavorite:
+          type: boolean
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          format: float
+          example: 4.5
+        type:
+          $ref: '#/components/schemas/HousingType'
+        bedrooms:
+          type: integer
+          minimum: 1
+          maximum: 8
+        maxAdults:
+          type: integer
+          minimum: 1
+          maximum: 10
+        price:
+          type: integer
+          minimum: 100
+          maximum: 100000
+          format: int32
+        amenities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Amenity'
+          minItems: 0
+          maxItems: 7 
+        author:
+          $ref: '#/components/schemas/User'
+        commentsCount:
+          type: integer
+          example: 5
+        location:
+          $ref: '#/components/schemas/Location'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        [title, description, publicationDate, city, previewImage, images,
+        isPremium, isFavorite, rating, type, bedrooms, maxAdults, price,
+        amenities, author, location]
+
+    OfferCreateInput:
+      allOf:
+        - $ref: '#/components/schemas/Offer'
+        - type: object
+          required:
+            [title, description, publicationDate, city, previewImage, images,
+            isPremium, isFavorite, rating, type, bedrooms, maxAdults, price,
+            amenities, location]
+
+    Comment:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          example: 65f2234a5b7890cdef987654
+        text:
+          type: string
+          minLength: 5
+          maxLength: 1024
+          pattern: '^[\w\s\.,!?\-()]{5,1024}$'
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          example: 4.7
+        author:
+          $ref: '#/components/schemas/User'
+        publicationDate:
+          type: string
+          format: date-time
+      required: [text, rating, author, publicationDate]
+
+    CommentCreateInput:
+      type: object
+      additionalProperties: false
+      properties:
+        text:
+          type: string
+          minLength: 5
+          maxLength: 1024
+          pattern: '^[a-zA-Zа-яА-ЯёЁ0-9\s\.,!?\-()]+$'
+        rating:
+          type: number
+          minimum: 1
+          maximum: 5
+      required: [text, rating]
+
+
+paths:
+  /users/register:
+    post:
+      tags:
+        - users
+      summary: Регистрация пользователя
+      description: Регистрирует нового пользователя.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegisterInput'
+      responses:
+        '201':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Ошибка валидации
+        '409':
+          description: Пользователь с таким email уже существует
+        '406':
+          description: Not Acceptable
+        '429':
+          description: Too Many Requests
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Авторизация пользователя
+      description: Авторизует пользователя на основе логина и пароля
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginInput'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+        '401':
+          description: Неверный логин или пароль
+        '406':
+          description: Not Acceptable
+        '429':
+          description: Too Many Requests
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+
+  /users/status:
+    get:
+      tags:
+        - users
+      summary: Проверка состояния пользователя
+      description: Возвращает информацию по авторизованному пользователю
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Пользователь авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Неавторизованный запрос
+        '406':
+          description: Not Acceptable
+        '429':
+          description: Too Many Requests
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+
+  /offers:
+    get:
+      tags:
+        - offers
+      summary: Получить список предложений
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 60
+      responses:
+        '200':
+          description: Список предложений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Offer'
+
+    post:
+      tags: 
+        - offers
+      summary: Создать новое предложение
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferCreateInput'
+      responses:
+        '201':
+          description: Предложение успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '400':
+          description: Ошибка валидации
+        '406':
+          description: Not Acceptable
+        '429':
+          description: Too Many Requests
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+
+  /offers/{offerId}:
+    get:
+      tags:
+        - offers
+      summary: Получить информацию о предложении
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Детальная информация о предложении
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '404':
+          description: Предложение не найдено
+        '406':
+          description: Not Acceptable
+        '429':
+          description: Too Many Requests
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+
+    patch:
+      tags:
+        - offers
+      summary: Обновить предложение
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Zа-яА-ЯёЁ0-9\s\.,!?\-()]+$'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferCreateInput'
+      responses:
+        '200':
+          description: Предложение обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '403':
+          description: Нет доступа
+        '404':
+          description: Предложение не найдено
+        '406':
+          description: Not Acceptable
+        '429':
+          description: Too Many Requests
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+
+    delete:
+      tags:
+         - offers
+      summary: Удалить предложение
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Zа-яА-ЯёЁ0-9\s\.,!?\-()]+$'
+      responses:
+        '204':
+          description: Успешное удаление
+        '403':
+          description: Нет доступа
+        '406':
+          description: Not Acceptable
+        '429':
+          description: Too Many Requests
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+
+  /offers/{offerId}/comments:
+    get:
+      tags:
+        - comments
+      summary: Получить комментарии к предложению
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Zа-яА-ЯёЁ0-9\s\.,!?\-()]+$'
+      responses:
+        '200':
+          description: Список комментариев
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 1000
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '406':
+          description: Not Acceptable
+        '429':
+          description: Too Many Requests
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+
+    post:
+      tags:
+        - comments
+      summary: Добавить комментарий
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: offerId
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Zа-яА-ЯёЁ0-9\s\.,!?\-()]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreateInput'
+      responses:
+        '201':
+          description: Комментарий добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '406':
+          description: Not Acceptable
+        '429':
+          description: Too Many Requests
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+
+      
+security:
+  - bearerAuth: []
