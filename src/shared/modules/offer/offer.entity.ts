@@ -1,4 +1,3 @@
-// offer/offer.entity.ts
 import { defaultClasses, getModelForClass, modelOptions, prop, Ref } from '@typegoose/typegoose';
 import { UserEntity } from '../user/index.js';
 import { City, HousingType, Amenity, Coordinates } from '../../../types/index.js';
@@ -37,9 +36,6 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop({ required: true, default: false })
   public isPremium!: boolean;
-
-  @prop({ required: true, default: false })
-  public isFavorite!: boolean;
 
   @prop({ required: true, min: 1, max: 5, default: 1 })
   public rating!: number;

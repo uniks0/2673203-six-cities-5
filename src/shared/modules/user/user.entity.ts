@@ -26,7 +26,7 @@ export class UserEntity extends defaultClasses.TimeStamps implements User {
   @prop({ required: true })
   public password!: string;
 
-  @prop({ required: true, enum: UserType }) // Убедитесь, что UserType импортирован
+  @prop({ required: true, enum: UserType })
   public type!: UserType;
 
   constructor(userData: CreateUserDto) {

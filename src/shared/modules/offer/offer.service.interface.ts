@@ -10,8 +10,7 @@ export interface OfferService {
     updateById(offerId: string, dto: Partial<CreateOfferDto>): Promise<DocumentType<OfferEntity> | null>;
     deleteById(offerId: string): Promise<DocumentType<OfferEntity> | null>;
     findPremiumByCity(city: City): Promise<DocumentType<OfferEntity>[]>;
-    findFavorites(): Promise<DocumentType<OfferEntity>[]>;
-    updateFavoriteStatus(offerId: string, isFavorite: boolean): Promise<DocumentType<OfferEntity> | null>;
     exists(offerId: string): Promise<boolean>;
     incrementCommentCount(offerId: string): Promise<DocumentType<OfferEntity> | null>;
-  }
+    updateRating(offerId: string): Promise<DocumentType<OfferEntity> | null>;
+}
