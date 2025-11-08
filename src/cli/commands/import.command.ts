@@ -15,6 +15,7 @@ import { Offer } from '../../types/offer.js';
 import { DEFAULT_USER_PASSWORD, DEFAULT_DB_PORT } from './command.constant.js';
 import { CityCoordinates } from '../../types/city-coordinates.js';
 import { Logger, PinoLogger } from '../../shared/libs/logger/index.js';
+import { CommentModel } from '../../shared/modules/comment/comment.entity.js';
 
 export class ImportCommand implements Command {
   private userService: UserService;
@@ -28,7 +29,7 @@ export class ImportCommand implements Command {
     this.onCompleteImport = this.onCompleteImport.bind(this);
 
     this.logger = new PinoLogger();
-    this.offerService = new DefaultOfferService(this.logger, OfferModel);
+    this.offerService = new DefaultOfferService(this.logger, OfferModel, CommentModel);
     this.userService = new DefaultUserService(this.logger, UserModel);
     this.databaseClient = new MongoDatabaseClient(this.logger);
   }
@@ -61,7 +62,6 @@ export class ImportCommand implements Command {
       previewImage: offer.previewImage,
       images: offer.images,
       isPremium: offer.isPremium,
-      isFavorite: offer.isFavorite,
       rating: offer.rating,
       type: offer.type,
       bedrooms: offer.bedrooms,

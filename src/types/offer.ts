@@ -40,7 +40,6 @@ export interface Offer {
   images: string[];
 
   isPremium: boolean;
-  isFavorite: boolean;
   rating: number;
 
   type: HousingType;
