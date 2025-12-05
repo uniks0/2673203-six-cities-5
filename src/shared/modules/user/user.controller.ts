@@ -50,12 +50,16 @@ export class UserController extends BaseController {
   ): Promise<void> {
     const existsUser = await this.userService.findByEmail(body.email);
 
-    if (! existsUser) {
+    if (!existsUser) {
       throw new HttpError(
         StatusCodes.UNAUTHORIZED,
         `User with email ${body.email} not found.`,
         'UserController',
       );
+    }
+    const isCorrectPassword = existsUser.verifyPassword(body.password, this.configService.get('SALT'));
+    if (!isCorrectPassword) {
+      throw new HttpError(StatusCodes.UNAUTHORIZED, 'Password is incorrect', 'UserController');
     }
 
     throw new HttpError(

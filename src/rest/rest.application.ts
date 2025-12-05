@@ -6,6 +6,8 @@ import { Component } from '../types/component.enum.js';
 import { DatabaseClient } from '../shared/libs/database-client/database-client.interface.js';
 import { getMongoURI } from '../shared/helpers/index.js';
 import { Controller, ExceptionFilter } from '../shared/libs/rest/index.js';
+import { FavoriteController } from '../shared/modules/favorite/favorite.controller.js';
+import { CommentController } from '../shared/modules/comment/comment.controller.js';
 
 @injectable()
 export class Application {
@@ -18,6 +20,8 @@ export class Application {
     @inject(Component.OfferController) private readonly offerController: Controller,
     @inject(Component.ExceptionFilter) private readonly appExceptionFilter: ExceptionFilter,
     @inject(Component.UserController) private readonly userController: Controller,
+    @inject(Component.FavoriteController) private readonly favoriteController: FavoriteController,
+    @inject(Component.CommentController) private readonly commentController: CommentController,
   ) {
     this.server = express();
   }
@@ -41,6 +45,8 @@ export class Application {
   private async _initControllers() {
     this.server.use('/offers', this.offerController.router);
     this.server.use('/users', this.userController.router);
+    this.server.use('/favorites', this.favoriteController.router);
+    this.server.use('/comments', this.commentController.router);
   }
 
   private async _initExceptionFilters() {

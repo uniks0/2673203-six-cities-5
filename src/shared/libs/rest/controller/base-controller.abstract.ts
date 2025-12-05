@@ -39,8 +39,11 @@ export abstract class BaseController implements Controller {
     this.send(res, StatusCodes.CREATED, data);
   }
 
-  public noContent<T>(res: Response, data: T): void {
-    this.send(res, StatusCodes.NO_CONTENT, data);
+  public noContent(res: Response): void {
+    res
+      .type(DEFAULT_CONTENT_TYPE)
+      .status(StatusCodes.NO_CONTENT)
+      .send();
   }
 
   public ok<T>(res: Response, data: T): void {
