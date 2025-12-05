@@ -1,6 +1,6 @@
 import { defaultClasses, getModelForClass, modelOptions, prop, Ref } from '@typegoose/typegoose';
-import { UserEntity } from '../user';
-import { OfferEntity } from '../offer';
+import { UserEntity } from '../user/user.entity.js';
+import { OfferEntity } from '../offer/offer.entity.js';
 
 @modelOptions({
   schemaOptions: {

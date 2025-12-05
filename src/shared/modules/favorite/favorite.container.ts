@@ -1,8 +1,8 @@
 import { Container } from 'inversify';
 import { Component } from '../../../types';
-import { DefaultFavoriteService } from './default-favorite.service';
-import { FavoriteEntity, FavoriteModel } from './favorite.entity';
-import { FavoriteService } from './favorite.service.interface';
+import { DefaultFavoriteService } from './default-favorite.service.js';
+import { FavoriteEntity, FavoriteModel } from './favorite.entity.js';
+import { FavoriteService } from './favorite.service.interface.js';
 import { types } from '@typegoose/typegoose';
 
 export function createFavoriteContainer() {

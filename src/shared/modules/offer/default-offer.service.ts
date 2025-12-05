@@ -9,11 +9,10 @@ import { CommentEntity } from '../comment/index.js';
 
 @injectable()
 export class DefaultOfferService implements OfferService {
-  private offerModel: any;
 
   constructor(
     @inject(Component.Logger) private readonly logger: Logger,
-    @inject(Component.OfferModel) offerModel: types.ModelType<OfferEntity>,
+    @inject(Component.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>,
     @inject(Component.CommentModel) private readonly commentModel: types.ModelType<CommentEntity>,
   ) {
     this.offerModel = offerModel;
