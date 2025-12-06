@@ -27,29 +27,24 @@ import { UserService } from '../shared/modules/user/user.service.interface.js';
 export function createApplicationContainer() {
   const container = new Container();
 
-  // Core
   container.bind<Application>(Component.Application).to(Application).inSingletonScope();
   container.bind<Logger>(Component.Logger).to(PinoLogger).inSingletonScope();
   container.bind<Config<RestSchema>>(Component.Config).to(RestConfig).inSingletonScope();
   container.bind<DatabaseClient>(Component.DatabaseClient).to(MongoDatabaseClient).inSingletonScope();
   container.bind<ExceptionFilter>(Component.ExceptionFilter).to(AppExceptionFilter).inSingletonScope();
 
-  // Offer
   container.bind<OfferService>(Component.OfferService).to(DefaultOfferService).inSingletonScope();
   container.bind<types.ModelType<OfferEntity>>(Component.OfferModel).toConstantValue(OfferModel);
   container.bind<Controller>(Component.OfferController).to(OfferController).inSingletonScope();
 
-  // User
   container.bind<UserService>(Component.UserService).to(DefaultUserService).inSingletonScope();
   container.bind<types.ModelType<UserEntity>>(Component.UserModel).toConstantValue(UserModel);
   container.bind<Controller>(Component.UserController).to(UserController).inSingletonScope();
 
-  // Comment
   container.bind<CommentService>(Component.CommentService).to(DefaultCommentService).inSingletonScope();
   container.bind<types.ModelType<CommentEntity>>(Component.CommentModel).toConstantValue(CommentModel);
   container.bind<Controller>(Component.CommentController).to(CommentController).inSingletonScope();
 
-  // Favorite
   container.bind<FavoriteService>(Component.FavoriteService).to(DefaultFavoriteService).inSingletonScope();
   container.bind<types.ModelType<FavoriteEntity>>(Component.FavoriteModel).toConstantValue(FavoriteModel);
   container.bind<Controller>(Component.FavoriteController).to(FavoriteController).inSingletonScope();
