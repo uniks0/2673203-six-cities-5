@@ -1,17 +1,16 @@
 import { DocumentType, types } from '@typegoose/typegoose';
 import { injectable, inject } from 'inversify';
 import { Logger } from 'pino';
-import { Component } from '../../../types';
 import { OfferEntity } from '../offer';
-import { FavoriteEntity } from './favorite.entity';
-import { FavoriteService } from './favorite.service.interface';
+import { FavoriteEntity } from './favorite.entity.js';
+import { FavoriteService } from './favorite.service.interface.js';
+import { Component } from '../../../types/component.enum.js';
 
 @injectable()
 export class DefaultFavoriteService implements FavoriteService {
   constructor(
     @inject(Component.Logger) private readonly logger: Logger,
     @inject(Component.FavoriteModel) private readonly favoriteModel: types.ModelType<FavoriteEntity>,
-    @inject(Component.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>
   ) {}
 
   public async addToFavorites(userId: string, offerId: string): Promise<void> {

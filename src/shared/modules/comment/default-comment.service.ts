@@ -1,11 +1,11 @@
 import { inject, injectable } from 'inversify';
-import { Component } from '../../../types/component.enum';
+import { Component } from '../../../types/component.enum.js';
 import { DocumentType, types } from '@typegoose/typegoose';
 import { Logger } from 'pino';
-import { OfferService } from '../offer/offer.service.interface';
-import { CommentEntity } from './comment.entity';
-import { CommentService } from './comment.service.interface';
-import { CreateCommentDto } from './dto/create-comment.dto';
+import { OfferService } from '../offer/offer.service.interface.js';
+import { CommentEntity } from './comment.entity.js';
+import { CommentService } from './comment.service.interface.js';
+import { CreateCommentDto } from './dto/create-comment.dto.js';
 
 @injectable()
 export class DefaultCommentService implements CommentService {

@@ -1,10 +1,10 @@
 import { DocumentType } from '@typegoose/typegoose';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'pino';
-import { Component } from '../../../types';
-import { LoginUserDto } from './dto/login-user.dto';
-import { UserEntity } from './user.entity';
-import { UserService } from './user.service.interface';
+import { LoginUserDto } from './dto/login-user.dto.js';
+import { UserService } from './user.service.interface.js';
+import { Component } from '../../../types/component.enum.js';
+import { UserEntity } from './user.entity.js';
 
 export interface UserAuthService {
     login(dto: LoginUserDto, salt: string): Promise<DocumentType<UserEntity> | null>;
