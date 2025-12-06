@@ -23,8 +23,9 @@ export abstract class BaseController implements Controller {
   }
 
   public addRoute(route: Route) {
-    const wrapped = asyncHandler(route.handler.bind(this) as unknown as (req: Request, res: Response, next: NextFunction) => Promise<void>);
-    this._router[route.method](route.path, wrapped);
+    const middlewarePipeline = (route.middlewares ?? []).map((mw) => mw.execute.bind(mw));
+    const wrappedHandler = asyncHandler(route.handler.bind(this) as unknown as (req: Request, res: Response, next: NextFunction) => Promise<void>);
+    this._router[route.method](route.path, ...middlewarePipeline, wrappedHandler);
     this.logger.info(`Route registered: ${route.method.toUpperCase()} ${route.path}`);
   }
 
