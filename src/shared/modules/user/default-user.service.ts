@@ -35,4 +35,12 @@ export class DefaultUserService implements UserService {
 
     return this.create(dto, salt);
   }
+
+  public async updateAvatar(userId: string, avatarPath: string) {
+    return this.userModel.findByIdAndUpdate(
+      userId,
+      { avatar: avatarPath },
+      { new: true }
+    ).exec();
+  }
 }

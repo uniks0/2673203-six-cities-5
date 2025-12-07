@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { StatusCodes } from 'http-status-codes';
-import { NextFunction, Request, Response, Router } from 'express';
+import { Response, Router } from 'express';
 import { Controller } from './controller.interface.js';
 import { Logger } from '../../logger/index.js';
 import { Route } from '../types/route.interface.js';
@@ -23,9 +23,13 @@ export abstract class BaseController implements Controller {
   }
 
   public addRoute(route: Route) {
-    const middlewarePipeline = (route.middlewares ?? []).map((mw) => mw.execute.bind(mw));
-    const wrappedHandler = asyncHandler(route.handler.bind(this) as unknown as (req: Request, res: Response, next: NextFunction) => Promise<void>);
-    this._router[route.method](route.path, ...middlewarePipeline, wrappedHandler);
+    const wrapperAsyncHandler = asyncHandler(route.handler.bind(this));
+    const middlewareHandlers = route.middlewares?.map(
+      (item) => asyncHandler(item.execute.bind(item))
+    );
+    const allHandlers = middlewareHandlers ? [...middlewareHandlers, wrapperAsyncHandler] : wrapperAsyncHandler;
+
+    this._router[route.method](route.path, allHandlers);
     this.logger.info(`Route registered: ${route.method.toUpperCase()} ${route.path}`);
   }
 

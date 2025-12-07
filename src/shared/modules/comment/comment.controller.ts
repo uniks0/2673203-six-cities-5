@@ -5,9 +5,11 @@ import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../../types/index.js';
 import { CommentService } from './comment.service.interface.js';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
-import { ValidateObjectIdMiddleware } from '../../middleware/validate-objectid.middleware.js';
-import { ValidateDtoMiddleware } from '../../middleware/validate-dto.middleware.js';
+import { ValidateObjectIdMiddleware } from '../../libs/rest/middleware/validate-objectid.middleware.js';
+import { ValidateDtoMiddleware } from '../../libs/rest/middleware/validate-dto.middleware.js';
 import { ANONYMOUS_USER_ID } from '../../../rest/index.js';
+import { DocumentExistsMiddleware } from '../../libs/rest/middleware/document-exist.middleware.js';
+import { OfferService } from '../offer/offer.service.interface.js';
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -20,6 +22,7 @@ export class CommentController extends BaseController {
   constructor(
     @inject(Component.Logger) logger: Logger,
     @inject(Component.CommentService) private readonly commentService: CommentService,
+    @inject(Component.OfferService) private readonly offerService: OfferService,
   ) {
     super(logger);
 
@@ -27,13 +30,21 @@ export class CommentController extends BaseController {
       path: '/:offerId/comments',
       method: HttpMethod.Get,
       handler: this.index,
-      middlewares: [new ValidateObjectIdMiddleware('offerId')]
+      middlewares: [
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
+      ]
     });
+
     this.addRoute({
       path: '/:offerId/comments',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateObjectIdMiddleware('offerId'), new ValidateDtoMiddleware(CreateCommentDto)]
+      middlewares: [
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),
+        new ValidateDtoMiddleware(CreateCommentDto)
+      ]
     });
   }
 
