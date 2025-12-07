@@ -10,6 +10,7 @@ import { FavoriteController } from '../shared/modules/favorite/favorite.controll
 import { CommentController } from '../shared/modules/comment/comment.controller.js';
 import { UserModel } from '../shared/modules/user/index.js';
 import { UserType } from '../types/index.js';
+import { ParseTokenMiddleware } from '../shared/libs/rest/middleware/parse-token.middleware.js';
 
 
 export let ANONYMOUS_USER_ID: string;
@@ -41,6 +42,7 @@ export class Application {
     @inject(Component.UserController) private readonly userController: Controller,
     @inject(Component.FavoriteController) private readonly favoriteController: FavoriteController,
     @inject(Component.CommentController) private readonly commentController: CommentController,
+    @inject(Component.AuthExceptionFilter) private readonly authExceptionFilter: ExceptionFilter,
   ) {
     this.server = express();
   }
@@ -58,8 +60,10 @@ export class Application {
   }
 
   private async _initMiddleware() {
+    const authenticateMiddleware = new ParseTokenMiddleware(this.config.get('JWT_SECRET'));
     this.server.use(express.json());
     this.server.use('/static', express.static(this.config.get('UPLOAD_DIRECTORY')));
+    this.server.use(authenticateMiddleware.execute.bind(authenticateMiddleware));
   }
 
   private async _initControllers() {
@@ -70,6 +74,7 @@ export class Application {
   }
 
   private async _initExceptionFilters() {
+    this.server.use(this.authExceptionFilter.catch.bind(this.authExceptionFilter));
     this.server.use((err, req, res, next) => this.appExceptionFilter.catch(err, req, res, next));
   }
 

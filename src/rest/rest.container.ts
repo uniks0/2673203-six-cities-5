@@ -23,6 +23,7 @@ import { DefaultUserService } from '../shared/modules/user/default-user.service.
 import { UserController } from '../shared/modules/user/user.controller.js';
 import { UserEntity, UserModel } from '../shared/modules/user/user.entity.js';
 import { UserService } from '../shared/modules/user/user.service.interface.js';
+import { createAuthContainer } from '../shared/modules/auth/index.js';
 
 export function createApplicationContainer() {
   const container = new Container();
@@ -48,6 +49,8 @@ export function createApplicationContainer() {
   container.bind<FavoriteService>(Component.FavoriteService).to(DefaultFavoriteService).inSingletonScope();
   container.bind<types.ModelType<FavoriteEntity>>(Component.FavoriteModel).toConstantValue(FavoriteModel);
   container.bind<Controller>(Component.FavoriteController).to(FavoriteController).inSingletonScope();
+
+  container.load(createAuthContainer());
 
   return container;
 }

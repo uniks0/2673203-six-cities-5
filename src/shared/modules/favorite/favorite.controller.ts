@@ -1,9 +1,10 @@
 import { inject, injectable } from 'inversify';
 import { Request, Response } from 'express';
-import { BaseController, HttpMethod } from '../../libs/rest/index.js';
+import { BaseController, HttpError, HttpMethod } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../../types/index.js';
 import { FavoriteService } from './favorite.service.interface.js';
+import { StatusCodes } from 'http-status-codes';
 
 @injectable()
 export class FavoriteController extends BaseController {
@@ -18,18 +19,33 @@ export class FavoriteController extends BaseController {
     this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.index });
   }
 
-  public async add({ params, user }: Request, res: Response): Promise<void> {
-    await this.favoriteService.addToFavorites(user.id, params.offerId);
+  public async add(req: Request, res: Response): Promise<void> {
+    const userId = req.tokenPayload?.id;
+    if (!userId) {
+      throw new HttpError(StatusCodes.UNAUTHORIZED, 'Unauthorized', 'FavoriteController');
+    }
+
+    await this.favoriteService.addToFavorites(userId, req.params.offerId);
     this.noContent(res);
   }
 
-  public async remove({ params, user }: Request, res: Response): Promise<void> {
-    await this.favoriteService.removeFromFavorites(user.id, params.offerId);
+  public async remove(req: Request, res: Response): Promise<void> {
+    const userId = req.tokenPayload?.id;
+    if (!userId) {
+      throw new HttpError(StatusCodes.UNAUTHORIZED, 'Unauthorized', 'FavoriteController');
+    }
+
+    await this.favoriteService.removeFromFavorites(userId, req.params.offerId);
     this.noContent(res);
   }
 
-  public async index({ user }: Request, res: Response): Promise<void> {
-    const favorites = await this.favoriteService.findFavoritesByUser(user.id);
+  public async index(req: Request, res: Response): Promise<void> {
+    const userId = req.tokenPayload?.id;
+    if (!userId) {
+      throw new HttpError(StatusCodes.UNAUTHORIZED, 'Unauthorized', 'FavoriteController');
+    }
+
+    const favorites = await this.favoriteService.findFavoritesByUser(userId);
     this.ok(res, favorites);
   }
 }
