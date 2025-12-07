@@ -7,6 +7,8 @@ import { OfferService } from './offer.service.interface.js';
 import { CreateOfferDto, OfferRdo } from './index.js';
 import { fillDTO } from '../../helpers/index.js';
 import { StatusCodes } from 'http-status-codes';
+import { ValidateObjectIdMiddleware } from '../../libs/rest/middleware/validate-objectid.middleware.js';
+import { DocumentExistsMiddleware } from '../../libs/rest/middleware/document-exist.middleware.js';
 
 @injectable()
 export class OfferController extends BaseController {
@@ -16,12 +18,37 @@ export class OfferController extends BaseController {
   ) {
     super(logger);
 
+    this.logger.info('Register routes for OfferController');
+
+    this.addRoute({
+      path: '/:offerId',
+      method: HttpMethod.Get,
+      handler: this.show,
+      middlewares: [
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
+      ]
+    });
     this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.index });
     this.addRoute({ path: '/', method: HttpMethod.Post, handler: this.create });
-
-    this.addRoute({ path: '/:offerId', method: HttpMethod.Get, handler: this.show });
-    this.addRoute({ path: '/:offerId', method: HttpMethod.Patch, handler: this.update });
-    this.addRoute({ path: '/:offerId', method: HttpMethod.Delete, handler: this.delete });
+    this.addRoute({
+      path: '/:offerId',
+      method: HttpMethod.Patch,
+      handler: this.update,
+      middlewares: [
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
+      ]
+    });
+    this.addRoute({
+      path: '/:offerId',
+      method: HttpMethod.Delete,
+      handler: this.delete,
+      middlewares: [
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
+      ]
+    });
 
     this.addRoute({ path: '/premium/:city', method: HttpMethod.Get, handler: this.getPremium });
   }
@@ -50,31 +77,16 @@ export class OfferController extends BaseController {
 
   public async show({ params }: Request, res: Response): Promise<void> {
     const offer = await this.offerService.findById(params.offerId);
-
-    if (!offer) {
-      throw new HttpError(StatusCodes.NOT_FOUND, 'Offer not found', 'OfferController');
-    }
-
     this.ok(res, fillDTO(OfferRdo, offer));
   }
 
   public async update({ params, body }: Request, res: Response): Promise<void> {
     const updated = await this.offerService.updateById(params.offerId, body);
 
-    if (!updated) {
-      throw new HttpError(StatusCodes.NOT_FOUND, 'Offer not found', 'OfferController');
-    }
-
     this.ok(res, fillDTO(OfferRdo, updated));
   }
 
-  public async delete({ params }: Request, res: Response): Promise<void> {
-    const deleted = await this.offerService.deleteById(params.offerId);
-
-    if (!deleted) {
-      throw new HttpError(StatusCodes.NOT_FOUND, 'Offer not found', 'OfferController');
-    }
-
+  public async delete(_req: Request, res: Response): Promise<void> {
     this.noContent(res);
   }
 
