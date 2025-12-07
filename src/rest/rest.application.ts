@@ -8,6 +8,25 @@ import { getMongoURI } from '../shared/helpers/index.js';
 import { Controller, ExceptionFilter } from '../shared/libs/rest/index.js';
 import { FavoriteController } from '../shared/modules/favorite/favorite.controller.js';
 import { CommentController } from '../shared/modules/comment/comment.controller.js';
+import { UserModel } from '../shared/modules/user/index.js';
+import { UserType } from '../types/index.js';
+
+
+export let ANONYMOUS_USER_ID: string;
+
+export async function ensureAnonymousUser() {
+  let user = await UserModel.findOne({ name: 'Anonymous' });
+  if (!user) {
+    user = await UserModel.create({
+      name: 'Anonymous',
+      email: 'anon@example.com',
+      password: 'anon',
+      type: UserType.Standard,
+      avatar: '',
+    });
+  }
+  ANONYMOUS_USER_ID = user._id.toString();
+}
 
 @injectable()
 export class Application {
@@ -64,6 +83,9 @@ export class Application {
     this.logger.info('Init database…');
     await this._initDb();
     this.logger.info('Init database completed');
+
+    await ensureAnonymousUser();
+    this.logger.info(`Anonymous user initialized with ID: ${ANONYMOUS_USER_ID}`);
 
     this.logger.info('Init app-level middleware');
     await this._initMiddleware();

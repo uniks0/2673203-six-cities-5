@@ -5,6 +5,9 @@ import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../../types/index.js';
 import { CommentService } from './comment.service.interface.js';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
+import { ValidateObjectIdMiddleware } from '../../middleware/validate-objectid.middleware.js';
+import { ValidateDtoMiddleware } from '../../middleware/validate-dto.middleware.js';
+import { ANONYMOUS_USER_ID } from '../../../rest/index.js';
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -20,8 +23,18 @@ export class CommentController extends BaseController {
   ) {
     super(logger);
 
-    this.addRoute({ path: '/:offerId/comments', method: HttpMethod.Get, handler: this.index });
-    this.addRoute({ path: '/:offerId/comments', method: HttpMethod.Post, handler: this.create });
+    this.addRoute({
+      path: '/:offerId/comments',
+      method: HttpMethod.Get,
+      handler: this.index,
+      middlewares: [new ValidateObjectIdMiddleware('offerId')]
+    });
+    this.addRoute({
+      path: '/:offerId/comments',
+      method: HttpMethod.Post,
+      handler: this.create,
+      middlewares: [new ValidateObjectIdMiddleware('offerId'), new ValidateDtoMiddleware(CreateCommentDto)]
+    });
   }
 
   public async index({ params }: Request, res: Response): Promise<void> {
@@ -29,11 +42,13 @@ export class CommentController extends BaseController {
     this.ok(res, comments);
   }
 
-  public async create({ params, body, user }: Request, res: Response): Promise<void> {
+  public async create(req: Request, res: Response): Promise<void> {
+    const { params, body } = req;
+
     const dto: CreateCommentDto = {
       ...body,
       offerId: params.offerId,
-      userId: user.id,
+      userId: req.user?.id ?? ANONYMOUS_USER_ID,
     };
 
     const result = await this.commentService.create(dto);
