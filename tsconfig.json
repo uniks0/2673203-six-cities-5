@@ -22,7 +22,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "emitDecoratorMetadata": true,
-    "types": ["node"],
+    "types": ["node", "express"],
     "lib": ["ESNext"]
   },
   "include": ["src/**/*.ts", "src/shared/libs/offer-generator"],
